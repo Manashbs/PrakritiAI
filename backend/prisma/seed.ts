@@ -7,10 +7,12 @@ async function main() {
     console.log('Seeding PrakritiAI database...');
 
     // 1. Create a predefined Admin
-    const adminPassword = await bcrypt.hash('admin123', 10);
+    const adminPassword = await bcrypt.hash('POQ07222@', 10);
     const admin = await prisma.user.upsert({
         where: { email: 'admin@prakritiai.com' },
-        update: {},
+        update: {
+            passwordHash: adminPassword,
+        },
         create: {
             email: 'admin@prakritiai.com',
             name: 'Prakriti Admin',
