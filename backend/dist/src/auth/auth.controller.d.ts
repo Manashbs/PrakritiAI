@@ -21,4 +21,10 @@ export declare class AuthController {
         };
     }>;
     getProfile(req: any): any;
+    forgotPassword(req: any): Promise<{
+        message: string;
+    }>;
+    resetPassword(req: any): Promise<{
+        message: string;
+    }>;
 }

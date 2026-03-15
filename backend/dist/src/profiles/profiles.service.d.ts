@@ -18,7 +18,9 @@ export declare class ProfilesService {
         role: import(".prisma/client").$Enums.Role;
         createdAt: Date;
         updatedAt: Date;
+        resetPasswordToken: string | null;
         status: string;
+        resetPasswordExpires: Date | null;
     }>;
     getAllPractitioners(): Promise<({
         user: {

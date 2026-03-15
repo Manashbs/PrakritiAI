@@ -47,12 +47,16 @@ const common_1 = require("@nestjs/common");
 const users_service_1 = require("../users/users.service");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
+const uuid_1 = require("uuid");
+const prisma_service_1 = require("../prisma.service");
 let AuthService = class AuthService {
     usersService;
     jwtService;
-    constructor(usersService, jwtService) {
+    prisma;
+    constructor(usersService, jwtService, prisma) {
         this.usersService = usersService;
         this.jwtService = jwtService;
+        this.prisma = prisma;
     }
     async validateUser(email, pass) {
         const user = await this.usersService.user({ email });
@@ -97,11 +101,57 @@ let AuthService = class AuthService {
         const newUser = await this.usersService.createUser(userCreateInput);
         return this.login(newUser);
     }
+    async forgotPassword(email) {
+        if (!email)
+            throw new common_1.UnauthorizedException('Email is required');
+        const user = await this.usersService.user({ email });
+        if (!user) {
+            return { message: 'If that email exists, a reset link will be sent.' };
+        }
+        const token = (0, uuid_1.v4)();
+        const expires = new Date();
+        expires.setHours(expires.getHours() + 1);
+        await this.prisma.user.update({
+            where: { email },
+            data: {
+                resetPasswordToken: token,
+                resetPasswordExpires: expires
+            }
+        });
+        const resetUrl = `https://prakriti-ai-ctnm.vercel.app/reset-password?token=${token}`;
+        console.log(`\n\n=== PASSWORD RESET LINK GENERATED ===`);
+        console.log(`To: ${email}`);
+        console.log(`Link: ${resetUrl}`);
+        console.log(`=====================================\n\n`);
+        return { message: 'If that email exists, a reset link will be sent.' };
+    }
+    async resetPassword(token, newPassword) {
+        if (!token || !newPassword) {
+            throw new common_1.UnauthorizedException('Token and new password are required');
+        }
+        const user = await this.prisma.user.findFirst({
+            where: { resetPasswordToken: token }
+        });
+        if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+            throw new common_1.UnauthorizedException('Password reset token is invalid or has expired');
+        }
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                passwordHash,
+                resetPasswordToken: null,
+                resetPasswordExpires: null
+            }
+        });
+        return { message: 'Password has been successfully reset' };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [users_service_1.UsersService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        prisma_service_1.PrismaService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

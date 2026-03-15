@@ -21,8 +21,18 @@ export class AuthController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Get('profile')
     getProfile(@Request() req) {
         return req.user;
+    }
+    @Post('forgot-password')
+    async forgotPassword(@Body() req) {
+        return this.authService.forgotPassword(req.email);
+    }
+
+    @Post('reset-password')
+    async resetPassword(@Body() req) {
+        return this.authService.resetPassword(req.token, req.newPassword);
     }
 }

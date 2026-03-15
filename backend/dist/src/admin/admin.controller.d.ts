@@ -40,7 +40,9 @@ export declare class AdminController {
             role: import(".prisma/client").$Enums.Role;
             createdAt: Date;
             updatedAt: Date;
+            resetPasswordToken: string | null;
             status: string;
+            resetPasswordExpires: Date | null;
         };
     }>;
     deleteUser(req: any, id: string): Promise<{
@@ -51,7 +53,9 @@ export declare class AdminController {
         role: import(".prisma/client").$Enums.Role;
         createdAt: Date;
         updatedAt: Date;
+        resetPasswordToken: string | null;
         status: string;
+        resetPasswordExpires: Date | null;
     } | {
         success: boolean;
     }>;
@@ -63,7 +67,9 @@ export declare class AdminController {
         role: import(".prisma/client").$Enums.Role;
         createdAt: Date;
         updatedAt: Date;
+        resetPasswordToken: string | null;
         status: string;
+        resetPasswordExpires: Date | null;
     }>;
     updateUserStatus(req: any, id: string, status: string): Promise<{
         id: string;
@@ -73,7 +79,9 @@ export declare class AdminController {
         role: import(".prisma/client").$Enums.Role;
         createdAt: Date;
         updatedAt: Date;
+        resetPasswordToken: string | null;
         status: string;
+        resetPasswordExpires: Date | null;
     }>;
     verifyPractitionerKyc(req: any, practitionerId: string): Promise<{
         id: string;

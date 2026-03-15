@@ -28,8 +28,9 @@ model User {
   passwordHash String
   name         String
   role         Role   @default(PATIENT)
-  status       String @default("ACTIVE") // ACTIVE or SUSPENDED
-
+  status               String    @default("ACTIVE") // ACTIVE or SUSPENDED
+  resetPasswordToken   String?   @unique
+  resetPasswordExpires DateTime?
   practitionerProfile PractitionerProfile?
 
   appointmentsAsPatient Appointment[]  @relation("PatientAppointments")

@@ -4,18 +4,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Leaf, Stethoscope, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import PasswordStrengthMeter from "../../components/PasswordStrengthMeter";
 
 export default function RegisterPage() {
     const router = useRouter();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [role, setRole] = useState("PATIENT");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match. Please try again.");
+            return;
+        }
+
         setLoading(true);
         setError("");
 
@@ -126,17 +134,34 @@ export default function RegisterPage() {
                             />
                         </div>
 
-                        <div>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                minLength={6}
-                                className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-[#2D7A5D] focus:ring-1 focus:ring-[#2D7A5D] outline-none transition-all text-sm bg-gray-50/50 text-gray-900"
-                                placeholder="Password (min. 6 characters)"
-                            />
-                        </div>
+                            <div className="relative">
+                                <input
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    minLength={6}
+                                    className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-[#2D7A5D] focus:ring-1 focus:ring-[#2D7A5D] outline-none transition-all text-sm bg-gray-50/50 text-gray-900"
+                                    placeholder="Password"
+                                />
+                                <PasswordStrengthMeter password={password} />
+                            </div>
+
+                            <div>
+                                <input
+                                    type="password"
+                                    required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    minLength={6}
+                                    className={`w-full px-5 py-4 rounded-xl border outline-none transition-all text-sm bg-gray-50/50 text-gray-900 ${
+                                        confirmPassword && password !== confirmPassword 
+                                        ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
+                                        : 'border-gray-200 focus:border-[#2D7A5D] focus:ring-1 focus:ring-[#2D7A5D]'
+                                    }`}
+                                    placeholder="Confirm Password"
+                                />
+                            </div>
 
                         <div>
                             <select
@@ -151,7 +176,7 @@ export default function RegisterPage() {
 
                         <button
                             type="submit"
-                            disabled={loading || !email || !password || !name}
+                            disabled={loading || !email || !password || !confirmPassword || !name || password !== confirmPassword}
                             className="w-full py-4 bg-[#2D7A5D] text-white rounded-xl font-bold hover:bg-[#24614A] transition-colors shadow-lg shadow-green-900/20 disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2 mt-2"
                         >
                             {loading ? "Creating Account..." : "Join PrakritiAI"} <ArrowRight className="w-4 h-4" />

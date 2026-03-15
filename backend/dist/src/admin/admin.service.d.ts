@@ -57,7 +57,9 @@ export declare class AdminService {
         role: import(".prisma/client").$Enums.Role;
         createdAt: Date;
         updatedAt: Date;
+        resetPasswordToken: string | null;
         status: string;
+        resetPasswordExpires: Date | null;
     }>;
     updateUserStatus(userId: string, status: string): Promise<{
         id: string;
@@ -67,7 +69,9 @@ export declare class AdminService {
         role: import(".prisma/client").$Enums.Role;
         createdAt: Date;
         updatedAt: Date;
+        resetPasswordToken: string | null;
         status: string;
+        resetPasswordExpires: Date | null;
     }>;
     createUser(data: any): Promise<{
         message: string;
@@ -79,7 +83,9 @@ export declare class AdminService {
             role: import(".prisma/client").$Enums.Role;
             createdAt: Date;
             updatedAt: Date;
+            resetPasswordToken: string | null;
             status: string;
+            resetPasswordExpires: Date | null;
         };
     }>;
     deleteUser(userId: string): Promise<{
@@ -90,7 +96,9 @@ export declare class AdminService {
         role: import(".prisma/client").$Enums.Role;
         createdAt: Date;
         updatedAt: Date;
+        resetPasswordToken: string | null;
         status: string;
+        resetPasswordExpires: Date | null;
     } | {
         success: boolean;
     }>;

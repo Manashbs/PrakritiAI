@@ -2,12 +2,16 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
+import * as nodemailer from 'nodemailer';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private prisma: PrismaService
     ) { }
 
     async validateUser(email: string, pass: string): Promise<any> {
@@ -67,5 +71,67 @@ export class AuthService {
 
         const newUser = await this.usersService.createUser(userCreateInput);
         return this.login(newUser);
+    }
+
+    async forgotPassword(email: string) {
+        if (!email) throw new UnauthorizedException('Email is required');
+
+        const user = await this.usersService.user({ email });
+        if (!user) {
+            // For security, don't reveal if the user exists or not, just return success
+            return { message: 'If that email exists, a reset link will be sent.' };
+        }
+
+        const token = uuidv4();
+        // Set Expiration to 1 hour from now
+        const expires = new Date();
+        expires.setHours(expires.getHours() + 1);
+
+        await this.prisma.user.update({
+            where: { email },
+            data: {
+                resetPasswordToken: token,
+                resetPasswordExpires: expires
+            }
+        });
+
+        // Setup Nodemailer (For now, just a dummy transporter to log the URL)
+        // Note: For a real app, you would configure SMTP credentials here.
+        const resetUrl = `https://prakriti-ai-ctnm.vercel.app/reset-password?token=${token}`;
+        
+        console.log(`\n\n=== PASSWORD RESET LINK GENERATED ===`);
+        console.log(`To: ${email}`);
+        console.log(`Link: ${resetUrl}`);
+        console.log(`=====================================\n\n`);
+
+        return { message: 'If that email exists, a reset link will be sent.' };
+    }
+
+    async resetPassword(token: string, newPassword: string) {
+        if (!token || !newPassword) {
+            throw new UnauthorizedException('Token and new password are required');
+        }
+
+        // Find user by token
+        const user = await this.prisma.user.findFirst({
+            where: { resetPasswordToken: token }
+        });        if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+            throw new UnauthorizedException('Password reset token is invalid or has expired');
+        }
+
+        // Hash new password
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+
+        // Update user and clear reset tokens
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                passwordHash,
+                resetPasswordToken: null,
+                resetPasswordExpires: null
+            }
+        });
+
+        return { message: 'Password has been successfully reset' };
     }
 }
