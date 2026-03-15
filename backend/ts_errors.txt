@@ -1,0 +1,25 @@
+﻿src/appointments/appointments.controller.ts(11,27): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/appointments/appointments.controller.ts(11,43): error TS7006: Parameter 'body' implicitly has an 'any' type.
+src/appointments/appointments.controller.ts(17,29): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/appointments/appointments.service.ts(10,48): error TS2339: Property 'practitionerProfile' does not exist on type 'PrismaService'.
+src/appointments/appointments.service.ts(20,44): error TS2339: Property 'appointment' does not exist on type 'PrismaService'.
+src/appointments/appointments.service.ts(35,28): error TS2339: Property 'appointment' does not exist on type 'PrismaService'.
+src/appointments/appointments.service.ts(47,28): error TS2339: Property 'appointment' does not exist on type 'PrismaService'.
+src/appointments/appointments.service.ts(61,48): error TS2339: Property 'practitionerProfile' does not exist on type 'PrismaService'.
+src/appointments/appointments.service.ts(67,28): error TS2339: Property 'appointment' does not exist on type 'PrismaService'.
+src/auth/auth.controller.ts(10,17): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/auth/auth.controller.ts(19,20): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/auth/auth.controller.ts(25,16): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/auth/jwt.strategy.ts(4,10): error TS2305: Module '"process"' has no exported member 'process'.
+src/prisma.service.ts(2,10): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+src/prisma.service.ts(7,20): error TS2339: Property '$connect' does not exist on type 'PrismaService'.
+src/profiles/profiles.controller.ts(11,24): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/profiles/profiles.controller.ts(16,37): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/profiles/profiles.controller.ts(16,53): error TS7006: Parameter 'body' implicitly has an 'any' type.
+src/profiles/profiles.controller.ts(22,29): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/profiles/profiles.service.ts(9,43): error TS2339: Property 'user' does not exist on type 'PrismaService'.
+src/profiles/profiles.service.ts(22,28): error TS2339: Property 'practitionerProfile' does not exist on type 'PrismaService'.
+src/users/users.service.ts(3,10): error TS2305: Module '"@prisma/client"' has no exported member 'User'.
+src/users/users.service.ts(3,16): error TS2305: Module '"@prisma/client"' has no exported member 'Prisma'.
+src/users/users.service.ts(12,28): error TS2339: Property 'user' does not exist on type 'PrismaService'.
+src/users/users.service.ts(18,28): error TS2339: Property 'user' does not exist on type 'PrismaService'.
