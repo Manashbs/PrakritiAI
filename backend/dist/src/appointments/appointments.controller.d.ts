@@ -42,8 +42,8 @@ export declare class AppointmentsController {
             bio: string | null;
             consultationFee: number;
             kycVerified: boolean;
-            userId: string;
             kycPhoto: string | null;
+            userId: string;
         };
     } & {
         id: string;

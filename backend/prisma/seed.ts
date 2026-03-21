@@ -22,6 +22,7 @@ async function main() {
     });
     console.log(`Upserted Admin: ${admin.email}`);
 
+    /*
     // 2. Create a verified Practitioner
     const docPassword = await bcrypt.hash('doctor123', 10);
     const doctor = await prisma.user.upsert({
@@ -60,6 +61,7 @@ async function main() {
             console.log(`Created product: ${p.name}`);
         }
     }
+    */
 
     console.log('Seeding completed successfully! 🎉');
 }

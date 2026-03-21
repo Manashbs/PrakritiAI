@@ -9,8 +9,8 @@ export declare class ProfilesController {
             bio: string | null;
             consultationFee: number;
             kycVerified: boolean;
-            userId: string;
             kycPhoto: string | null;
+            userId: string;
         };
         id: string;
         email: string;
@@ -34,8 +34,8 @@ export declare class ProfilesController {
         bio: string | null;
         consultationFee: number;
         kycVerified: boolean;
-        userId: string;
         kycPhoto: string | null;
+        userId: string;
     })[]>;
     updatePractitionerProfile(req: any, body: any): Promise<{
         id: string;
@@ -43,8 +43,8 @@ export declare class ProfilesController {
         bio: string | null;
         consultationFee: number;
         kycVerified: boolean;
-        userId: string;
         kycPhoto: string | null;
+        userId: string;
     }>;
     uploadKycDocument(req: any, photo: string): Promise<{
         success: boolean;

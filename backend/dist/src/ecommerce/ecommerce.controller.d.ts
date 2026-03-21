@@ -26,8 +26,8 @@ export declare class EcommerceController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         status: string;
+        userId: string;
         totalAmount: number;
     }>;
     getMyOrders(req: any): Promise<({
@@ -52,8 +52,8 @@ export declare class EcommerceController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         status: string;
+        userId: string;
         totalAmount: number;
     })[]>;
 }

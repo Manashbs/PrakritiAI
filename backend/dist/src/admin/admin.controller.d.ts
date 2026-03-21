@@ -89,8 +89,8 @@ export declare class AdminController {
         bio: string | null;
         consultationFee: number;
         kycVerified: boolean;
-        userId: string;
         kycPhoto: string | null;
+        userId: string;
     }>;
     rejectPractitionerKyc(req: any, practitionerId: string): Promise<{
         id: string;
@@ -98,8 +98,8 @@ export declare class AdminController {
         bio: string | null;
         consultationFee: number;
         kycVerified: boolean;
-        userId: string;
         kycPhoto: string | null;
+        userId: string;
     } | {
         message: string;
     }>;
@@ -197,16 +197,16 @@ export declare class AdminController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         status: string;
+        userId: string;
         totalAmount: number;
     })[]>;
     updateOrderStatus(req: any, id: string, status: string): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         status: string;
+        userId: string;
         totalAmount: number;
     }>;
 }

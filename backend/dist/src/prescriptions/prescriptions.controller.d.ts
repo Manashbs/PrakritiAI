@@ -33,8 +33,8 @@ export declare class PrescriptionsController {
             bio: string | null;
             consultationFee: number;
             kycVerified: boolean;
-            userId: string;
             kycPhoto: string | null;
+            userId: string;
         };
         medicines: {
             id: string;
