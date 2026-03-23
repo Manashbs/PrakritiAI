@@ -32,6 +32,14 @@ let AppointmentsController = class AppointmentsController {
             return this.appointmentsService.getPatientAppointments(req.user.id);
         }
     }
+    async completeAppointment(id, req) {
+        return this.appointmentsService.completeAppointment(id, req.user.id);
+    }
+    async bookForPatient(req, body) {
+        if (req.user.role !== 'PRACTITIONER')
+            throw new Error('Only practitioners can book for patients');
+        return this.appointmentsService.bookForPatient(req.user.id, body);
+    }
 };
 exports.AppointmentsController = AppointmentsController;
 __decorate([
@@ -49,6 +57,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppointmentsController.prototype, "getMyAppointments", null);
+__decorate([
+    (0, common_1.Patch)(':id/complete'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AppointmentsController.prototype, "completeAppointment", null);
+__decorate([
+    (0, common_1.Post)('book-for-patient'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AppointmentsController.prototype, "bookForPatient", null);
 exports.AppointmentsController = AppointmentsController = __decorate([
     (0, common_1.Controller)('appointments'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

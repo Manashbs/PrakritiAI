@@ -52,6 +52,15 @@ export default function ConsultationsPage() {
     const handleBook = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage({ text: "", type: "" });
+
+        // ✅ Validate: appointment must be at least 5 minutes in the future
+        const selectedTime = new Date(startTime);
+        const minAllowedTime = new Date(Date.now() + 5 * 60 * 1000); // now + 5 minutes
+        if (selectedTime < minAllowedTime) {
+            setMessage({ text: "Please select a time at least 5 minutes from now.", type: "error" });
+            return;
+        }
+
         setBooking(true);
 
         try {
@@ -63,7 +72,7 @@ export default function ConsultationsPage() {
                 },
                 body: JSON.stringify({
                     practitionerId: bookingDoc.id,
-                    startTime: new Date(startTime).toISOString(),
+                    startTime: selectedTime.toISOString(),
                     notes
                 }),
             });

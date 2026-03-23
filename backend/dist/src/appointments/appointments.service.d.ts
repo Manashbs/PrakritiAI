@@ -58,4 +58,32 @@ export declare class AppointmentsService {
         practitionerId: string;
         patientId: string;
     })[]>;
+    completeAppointment(appointmentId: string, requestingUserId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        status: import(".prisma/client").$Enums.AppointmentStatus;
+        startTime: Date;
+        endTime: Date;
+        notes: string | null;
+        meetLink: string | null;
+        practitionerId: string;
+        patientId: string;
+    }>;
+    bookForPatient(practitionerUserId: string, data: {
+        patientId: string;
+        startTime: string;
+        notes?: string;
+    }): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        status: import(".prisma/client").$Enums.AppointmentStatus;
+        startTime: Date;
+        endTime: Date;
+        notes: string | null;
+        meetLink: string | null;
+        practitionerId: string;
+        patientId: string;
+    }>;
 }

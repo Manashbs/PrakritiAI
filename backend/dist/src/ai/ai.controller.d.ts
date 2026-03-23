@@ -6,8 +6,16 @@ export declare class AiController {
     constructor(aiService: AiService, profilesService: ProfilesService);
     generateTriage(req: any, symptoms: string): Promise<{
         response: string;
-        citations: any[];
+        model: string;
+        citations: string[];
         confidenceScore: number;
         requiresHumanReview: boolean;
+    }>;
+    chat(messages: {
+        role: 'user' | 'assistant';
+        content: string;
+    }[]): Promise<{
+        reply: string;
+        model: string;
     }>;
 }

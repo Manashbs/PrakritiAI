@@ -12,7 +12,8 @@ export class PrescriptionsService {
 
         if (!practitioner) throw new NotFoundException('Practitioner profile not found');
 
-        return this.prisma.prescription.create({
+        // 1. Save the core Digital Prescription
+        const prescription = await this.prisma.prescription.create({
             data: {
                 patientId: data.patientId,
                 practitionerId: practitioner.id,
@@ -29,6 +30,34 @@ export class PrescriptionsService {
             },
             include: { medicines: true }
         });
+
+        // 2. Map textual medicines to physical products
+        const medicineNames = data.medicines.map((m: any) => m.name);
+        const physicalProducts = await this.prisma.product.findMany({
+            where: { name: { in: medicineNames } }
+        });
+
+        // 3. If matching products exist, bundle them into a Pending Order (Patient Cart)
+        if (physicalProducts.length > 0) {
+            const totalAmount = physicalProducts.reduce((sum, p) => sum + p.price, 0);
+            
+            await this.prisma.order.create({
+                data: {
+                    userId: data.patientId, // Attach cart to the patient
+                    totalAmount,
+                    status: 'PENDING',
+                    items: {
+                        create: physicalProducts.map(p => ({
+                            productId: p.id,
+                            quantity: 1, // Default to 1 unit prescribed
+                            price: p.price
+                        }))
+                    }
+                }
+            });
+        }
+
+        return prescription;
     }
 
     async getPatientPrescriptions(patientId: string) {

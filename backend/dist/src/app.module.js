@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const schedule_1 = require("@nestjs/schedule");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const vector_db_module_1 = require("./vector-db/vector-db.module");
@@ -21,12 +22,14 @@ const ai_module_1 = require("./ai/ai.module");
 const ecommerce_module_1 = require("./ecommerce/ecommerce.module");
 const admin_module_1 = require("./admin/admin.module");
 const prescriptions_module_1 = require("./prescriptions/prescriptions.module");
+const patient_documents_module_1 = require("./patient-documents/patient-documents.module");
+const doctor_notes_module_1 = require("./doctor-notes/doctor-notes.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [vector_db_module_1.VectorDbModule, auth_module_1.AuthModule, users_module_1.UsersModule, profiles_module_1.ProfilesModule, appointments_module_1.AppointmentsModule, teleconsultation_module_1.TeleconsultationModule, ai_module_1.AiModule, ecommerce_module_1.EcommerceModule, admin_module_1.AdminModule, prescriptions_module_1.PrescriptionsModule],
+        imports: [schedule_1.ScheduleModule.forRoot(), vector_db_module_1.VectorDbModule, auth_module_1.AuthModule, users_module_1.UsersModule, profiles_module_1.ProfilesModule, appointments_module_1.AppointmentsModule, teleconsultation_module_1.TeleconsultationModule, ai_module_1.AiModule, ecommerce_module_1.EcommerceModule, admin_module_1.AdminModule, prescriptions_module_1.PrescriptionsModule, patient_documents_module_1.PatientDocumentsModule, doctor_notes_module_1.DoctorNotesModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, prisma_service_1.PrismaService],
     })

@@ -11,11 +11,16 @@ export class AiController {
         private readonly profilesService: ProfilesService
     ) { }
 
+    // Structured Ayurvedic triage with RAG enrichment
     @Post('triage')
     async generateTriage(@Request() req, @Body('symptoms') symptoms: string) {
-        // Get basic patient profile
         const profile = await this.profilesService.getProfile(req.user.id);
-
         return this.aiService.getDiagnosticTriage(profile, symptoms);
+    }
+
+    // General conversational AI chat (used by the AI assistant widget)
+    @Post('chat')
+    async chat(@Body('messages') messages: { role: 'user' | 'assistant'; content: string }[]) {
+        return this.aiService.chat(messages);
     }
 }

@@ -37,6 +37,8 @@ model User {
   appointmentsAsPatient Appointment[]  @relation("PatientAppointments")
   orders                Order[]
   prescriptions         Prescription[] @relation("PatientPrescriptions")
+  documents             PatientDocument[] @relation("PatientDocuments")
+  doctorNotes           DoctorNote[]     @relation("PatientDoctorNotes")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -55,6 +57,7 @@ model PractitionerProfile {
 
   appointments  Appointment[]  @relation("PractitionerAppointments")
   prescriptions Prescription[] @relation("PractitionerPrescriptions")
+  doctorNotes   DoctorNote[]   @relation("PractitionerNotes")
 }
 
 model Appointment {
@@ -72,6 +75,7 @@ model Appointment {
   meetLink  String?
 
   prescriptions Prescription[]
+  documents     PatientDocument[] @relation("AppointmentDocuments")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -148,4 +152,36 @@ model SystemLog {
   details   String
   level     String   @default("INFO") // INFO, WARNING, ERROR, CRITICAL
   createdAt DateTime @default(now())
+}
+
+// Patient uploads (test reports, X-rays, etc.) visible to consulting doctors
+model PatientDocument {
+  id            String  @id @default(uuid())
+  patientId     String
+  patient       User    @relation("PatientDocuments", fields: [patientId], references: [id])
+
+  appointmentId String?
+  appointment   Appointment? @relation("AppointmentDocuments", fields: [appointmentId], references: [id])
+
+  label         String              // e.g. "Blood Test Report"
+  fileType      String              // e.g. "PDF", "JPG"
+  base64Content String              // actual file stored as base64
+
+  createdAt DateTime @default(now())
+}
+
+// Persistent clinical notes written by practitioner per patient
+model DoctorNote {
+  id             String              @id @default(uuid())
+  patientId      String
+  patient        User                @relation("PatientDoctorNotes", fields: [patientId], references: [id])
+
+  practitionerId String
+  practitioner   PractitionerProfile @relation("PractitionerNotes", fields: [practitionerId], references: [id])
+
+  content        String
+  isVisibleToPatient Boolean         @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

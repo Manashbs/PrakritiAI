@@ -19,7 +19,7 @@ let AppointmentsService = class AppointmentsService {
     }
     async bookAppointment(patientId, data) {
         const practitioner = await this.prisma.practitionerProfile.findUnique({
-            where: { userId: data.practitionerId }
+            where: { id: data.practitionerId }
         });
         if (!practitioner)
             throw new common_1.NotFoundException('Practitioner not found');
@@ -73,6 +73,37 @@ let AppointmentsService = class AppointmentsService {
                 patient: { select: { name: true, email: true } }
             },
             orderBy: { startTime: 'asc' },
+        });
+    }
+    async completeAppointment(appointmentId, requestingUserId) {
+        const appointment = await this.prisma.appointment.findUnique({
+            where: { id: appointmentId },
+            include: { practitioner: true }
+        });
+        if (!appointment)
+            throw new common_1.NotFoundException('Appointment not found');
+        return this.prisma.appointment.update({
+            where: { id: appointmentId },
+            data: { status: 'COMPLETED' }
+        });
+    }
+    async bookForPatient(practitionerUserId, data) {
+        const practitioner = await this.prisma.practitionerProfile.findUnique({
+            where: { userId: practitionerUserId }
+        });
+        if (!practitioner)
+            throw new common_1.NotFoundException('Practitioner profile not found');
+        const startTime = new Date(data.startTime);
+        const endTime = new Date(startTime.getTime() + 30 * 60000);
+        return this.prisma.appointment.create({
+            data: {
+                patientId: data.patientId,
+                practitionerId: practitioner.id,
+                startTime,
+                endTime,
+                notes: data.notes || 'Follow-up consultation',
+                status: 'SCHEDULED',
+            }
         });
     }
 };

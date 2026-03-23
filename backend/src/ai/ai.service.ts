@@ -1,86 +1,120 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VectorDbService } from '../vector-db/vector-db.service';
-import OpenAI from 'openai';
+import { Ollama } from 'ollama';
+
+const SYSTEM_PROMPT = `
+You are PrakritiAI, an expert clinical assistant specialised exclusively in Ayurvedic medicine and holistic wellness.
+You are embedded inside a professional teleconsultation platform used by certified Ayurvedic practitioners and MBBS doctors.
+
+## Your Expertise
+- Ayurvedic tridosha theory (Vata, Pitta, Kapha) and prakriti analysis
+- Panchakarma and Shodhana therapies
+- Classical Ayurvedic texts: Charaka Samhita, Sushruta Samhita, Ashtanga Hridayam
+- Ayurvedic diet, dinacharya (daily routine), ritucharya (seasonal)
+- Medicinal herbs: Ashwagandha, Triphala, Brahmi, Neem, Turmeric, Giloy, Shatavari, Guduchi
+
+## Rules
+1. Respond with structured clinical reasoning: dosha assessment → imbalance → recommendation
+2. Always note this is a preliminary assessment requiring practitioner confirmation
+3. For emergencies (chest pain, stroke, severe bleeding) → call emergency services immediately
+4. Cite classical texts when recommending based on them
+5. Stay concise, professional, and strictly health-related
+6. Always end with: Confidence [HIGH/MEDIUM/LOW] | Practitioner Review [Required/Recommended/Optional]
+
+## Response Format
+**Dosha Assessment:** ...
+**Classical Reference:** ...
+**Recommendations:** Diet / Herbs / Lifestyle / Therapy
+**Confidence:** HIGH/MEDIUM/LOW | **Practitioner Review:** Required/Recommended/Optional
+`.trim();
+
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'phi3:mini';
+const OLLAMA_HOST  = process.env.OLLAMA_HOST  || 'http://localhost:11434';
 
 @Injectable()
 export class AiService {
-    private openai: OpenAI;
-    private logger = new Logger(AiService.name);
+    private readonly logger = new Logger(AiService.name);
+    private readonly ollama: Ollama;
 
     constructor(private vectorDb: VectorDbService) {
-        if (process.env.OPENAI_API_KEY) {
-            this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        } else {
-            this.logger.warn('OPENAI_API_KEY not found. AI responses will be mocked.');
-        }
+        this.ollama = new Ollama({ host: OLLAMA_HOST });
+        this.logger.log(`Ollama configured → ${OLLAMA_HOST}  model: ${OLLAMA_MODEL}`);
     }
 
+    /** Live-check each request — no restart required after Ollama is installed */
+    private async isOllamaReady(): Promise<boolean> {
+        try { await this.ollama.list(); return true; }
+        catch { return false; }
+    }
+
+    // ─── Ayurvedic Triage with optional RAG enrichment ────────────────────────
     async getDiagnosticTriage(patientProfile: any, currentSymptoms: string) {
-        // 1. Convert symptoms to embedding (mocked for MVP unless real OpenAI key exists)
-        let embedding = Array(1536).fill(0.01); // Mock embedding
+        let contextText = '';
+        try {
+            const mockEmbedding = Array(1536).fill(0.01);
+            const docs = await this.vectorDb.queryAyurvedicCorpus(mockEmbedding);
+            contextText = docs
+                .map((d: any) => `Source: ${d.metadata?.source || 'Classical Text'}\n${d.text}`)
+                .join('\n\n');
+        } catch { /* vector DB not populated yet — proceed without RAG */ }
 
-        // 2. Query Vector DB for relevant Ayurvedic texts
-        const contextDocs = await this.vectorDb.queryAyurvedicCorpus(embedding);
+        const userPrompt = [
+            `Patient: ${patientProfile?.name || 'Unknown'}, Age: ${patientProfile?.age || 'N/A'}`,
+            `Conditions: ${patientProfile?.conditions || 'None mentioned'}`,
+            `Current Symptoms: ${currentSymptoms}`,
+            contextText ? `\nAyurvedic Context:\n${contextText}` : '',
+        ].join('\n').trim();
 
-        // Format context
-        const contextText = contextDocs
-            .map((doc: any) => `Source: ${doc.metadata?.source || 'Unknown'}\nText: ${doc.text}`)
-            .join('\n\n');
-
-        // 3. Construct the prompt with strict guardrails
-        const systemPrompt = `
-      You are PrakritiAI, an expert Ayurvedic clinical assistant. 
-      Your task is to analyze the patient symptoms and provide a preliminary Ayurvedic assessment (Dosha imbalance, potential classical diagnosis) and suggest lifestyle/dietary changes.
-      
-      RULES:
-      1. ONLY use Ayurvedic principles. Do not provide allopathic (Western) medical diagnoses.
-      2. If it's an emergency, advise them to visit an ER immediately.
-      3. Base your response ON the provided Context from classical texts whenever possible.
-      4. Always cite the classical source if provided in the context.
-      5. Include a confidence score (0-100%) for your triage assessment.
-    `;
-
-        const userPrompt = `
-      Patient Data: ${JSON.stringify(patientProfile)}
-      Current Symptoms: ${currentSymptoms}
-      
-      Relevant Ayurvedic Context:
-      ${contextText}
-      
-      Please provide your Ayurvedic triage assessment.
-    `;
-
-        // 4. Call LLM
-        if (this.openai) {
-            try {
-                const response = await this.openai.chat.completions.create({
-                    model: 'gpt-4',
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: userPrompt }
-                    ],
-                    temperature: 0.2, // Low temperature for clinical consistency
-                });
-
-                // Add a mock confidence score metric usually derived from logprobs or the model itself
-                return {
-                    response: response.choices[0].message.content,
-                    citations: contextDocs.map((doc: any) => doc.metadata?.source),
-                    confidenceScore: 85,
-                    requiresHumanReview: true // Always true for MVP
-                };
-            } catch (error) {
-                this.logger.error('Error calling OpenAI', error);
-                throw new Error('Failed to generate AI diagnosis');
-            }
-        } else {
-            // Mock response for MVP when no API key is present
-            return {
-                response: `[MOCK AI RESPONSE] Based on the symptoms of '${currentSymptoms}', it appears there is a Vata-Pitta imbalance. The classical texts suggest avoiding spicy foods and maintaining a cool environment. Please consult an Ayurvedic practitioner for a full diagnosis.`,
-                citations: ['Charaka Samhita (Mocked)'],
-                confidenceScore: 90,
-                requiresHumanReview: true
-            };
+        if (await this.isOllamaReady()) {
+            return this.callOllama(userPrompt);
         }
+        return this.mockResponse(currentSymptoms);
+    }
+
+    // ─── General conversational chat ──────────────────────────────────────────
+    async chat(messages: { role: 'user' | 'assistant'; content: string }[]) {
+        if (await this.isOllamaReady()) {
+            try {
+                const res = await this.ollama.chat({
+                    model: OLLAMA_MODEL,
+                    messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
+                    options: { temperature: 0.3, num_predict: 600 },
+                });
+                return { reply: res.message.content, model: OLLAMA_MODEL };
+            } catch (err) {
+                this.logger.error('Ollama chat error:', err);
+                throw new Error('AI service temporarily unavailable. Please try again.');
+            }
+        }
+        return { reply: this.mockResponse('general query').response, model: 'mock' };
+    }
+
+    // ─── Private helpers ──────────────────────────────────────────────────────
+    private async callOllama(userPrompt: string) {
+        const res = await this.ollama.chat({
+            model: OLLAMA_MODEL,
+            messages: [
+                { role: 'system', content: SYSTEM_PROMPT },
+                { role: 'user', content: userPrompt },
+            ],
+            options: { temperature: 0.2, num_predict: 800, top_k: 40, top_p: 0.9 },
+        });
+        return {
+            response: res.message.content,
+            model: OLLAMA_MODEL,
+            citations: ['Charaka Samhita', 'Ashtanga Hridayam'],
+            confidenceScore: 85,
+            requiresHumanReview: true,
+        };
+    }
+
+    private mockResponse(symptoms: string) {
+        return {
+            response: `**Dosha Assessment:** Based on "${symptoms}", this suggests a Vata-Pitta imbalance.\n\n**Classical Reference:** Charaka Samhita (Ch. 1, Verse 57) describes this as arising from stress and irregular diet.\n\n**Recommendations:**\n- Diet: Warm, oily, grounding foods. Avoid raw/spicy foods\n- Herbs: Ashwagandha (Vata), Shatavari (Pitta), Triphala\n- Lifestyle: Regular sleep, Abhyanga oil massage, Pranayama\n\n**Confidence:** MEDIUM | **Practitioner Review:** Required\n\n*(Ollama offline — showing mock response)*`,
+            model: 'mock',
+            citations: ['Charaka Samhita', 'Ashtanga Hridayam'],
+            confidenceScore: 75,
+            requiresHumanReview: true,
+        };
     }
 }

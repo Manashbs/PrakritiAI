@@ -28,6 +28,9 @@ let AiController = class AiController {
         const profile = await this.profilesService.getProfile(req.user.id);
         return this.aiService.getDiagnosticTriage(profile, symptoms);
     }
+    async chat(messages) {
+        return this.aiService.chat(messages);
+    }
 };
 exports.AiController = AiController;
 __decorate([
@@ -38,6 +41,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AiController.prototype, "generateTriage", null);
+__decorate([
+    (0, common_1.Post)('chat'),
+    __param(0, (0, common_1.Body)('messages')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], AiController.prototype, "chat", null);
 exports.AiController = AiController = __decorate([
     (0, common_1.Controller)('ai'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

@@ -23,7 +23,7 @@ let PrescriptionsService = class PrescriptionsService {
         });
         if (!practitioner)
             throw new common_1.NotFoundException('Practitioner profile not found');
-        return this.prisma.prescription.create({
+        const prescription = await this.prisma.prescription.create({
             data: {
                 patientId: data.patientId,
                 practitionerId: practitioner.id,
@@ -40,6 +40,28 @@ let PrescriptionsService = class PrescriptionsService {
             },
             include: { medicines: true }
         });
+        const medicineNames = data.medicines.map((m) => m.name);
+        const physicalProducts = await this.prisma.product.findMany({
+            where: { name: { in: medicineNames } }
+        });
+        if (physicalProducts.length > 0) {
+            const totalAmount = physicalProducts.reduce((sum, p) => sum + p.price, 0);
+            await this.prisma.order.create({
+                data: {
+                    userId: data.patientId,
+                    totalAmount,
+                    status: 'PENDING',
+                    items: {
+                        create: physicalProducts.map(p => ({
+                            productId: p.id,
+                            quantity: 1,
+                            price: p.price
+                        }))
+                    }
+                }
+            });
+        }
+        return prescription;
     }
     async getPatientPrescriptions(patientId) {
         return this.prisma.prescription.findMany({
