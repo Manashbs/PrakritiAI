@@ -50,8 +50,8 @@ export default function Sidebar() {
     const defaultNavLinks = [
         { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { name: "AI Analysis", href: "/triage", icon: Sparkles },
-        { name: "Wellness Store", href: "/store", icon: ShoppingBag },
         { name: "Consultations", href: "/consultations", icon: Calendar },
+        { name: "Wellness Store", href: "/store", icon: ShoppingBag },
         { name: "My Profile", href: "/profile", icon: User },
     ];
 

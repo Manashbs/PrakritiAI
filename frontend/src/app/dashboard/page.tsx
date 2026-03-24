@@ -79,15 +79,6 @@ export default function Dashboard() {
                         Here's your Prana overview for today.
                     </p>
                 </div>
-                <button
-                    className="flex items-center gap-2 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm text-sm"
-                    style={{ backgroundColor: themeColor }}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = themeBgHover}
-                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = themeColor}
-                >
-                    <Plus className="w-4 h-4" />
-                    Log Daily Vitals
-                </button>
             </header>
 
             {/* Metrics Cards */}
@@ -102,6 +93,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                         <h3 className="text-2xl font-serif font-bold text-[#2A3B47] mt-3">Unknown</h3>
+                        <p className="text-xs font-medium mt-2" style={{ color: themeColor }}>Coming Soon</p>
                     </div>
                 </div>
 
@@ -115,7 +107,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                         <h3 className="text-2xl font-serif font-bold text-[#2A3B47] mt-3">--</h3>
-                        <p className="text-xs font-medium mt-1" style={{ color: themeColor }}>-0.5 hrs <span className="text-gray-400 font-normal">vs last week</span></p>
+                        <p className="text-xs font-medium mt-2" style={{ color: themeColor }}>Coming Soon</p>
                     </div>
                 </div>
 
@@ -129,6 +121,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                         <h3 className="text-2xl font-serif font-bold text-[#2A3B47] mt-3">--</h3>
+                        <p className="text-xs font-medium mt-2" style={{ color: themeColor }}>Coming Soon</p>
                     </div>
                 </div>
 
@@ -142,6 +135,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                         <h3 className="text-2xl font-serif font-bold text-[#2A3B47] mt-3">--</h3>
+                        <p className="text-xs font-medium mt-2" style={{ color: themeColor }}>Coming Soon</p>
                     </div>
                 </div>
             </div>
