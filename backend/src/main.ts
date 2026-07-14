@@ -13,25 +13,27 @@ async function bootstrap() {
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
-  if (process.env.VERCEL) {
-    await app.init();
-    return app.getHttpAdapter().getInstance();
-  } else {
+  if (!process.env.VERCEL) {
     const PORT = process.env.PORT ?? 3001;
     await app.listen(PORT);
     console.log(`Application is running on: http://localhost:${PORT}`);
   }
+  return app;
 }
 
 // Global cached instance to prevent memory leaks on serverless cold starts
-let cachedServer: any;
+let cachedApp: any;
 
 export default async function handler(req: any, res: any) {
   try {
-    if (!cachedServer) {
-      cachedServer = await bootstrap();
+    if (!cachedApp) {
+      cachedApp = await bootstrap();
+      if (process.env.VERCEL) {
+        await cachedApp.init();
+      }
     }
-    return cachedServer(req, res);
+    const httpAdapter = cachedApp.getHttpAdapter();
+    return httpAdapter.getInstance()(req, res);
   } catch (error: any) {
     console.error('Handler error:', error);
     res.statusCode = 500;
