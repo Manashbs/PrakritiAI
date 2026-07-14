@@ -1,11 +1,33 @@
-const mainModule = require('../dist/src/main.js');
-const handler = mainModule.default || mainModule;
+const { NestFactory } = require('@nestjs/core');
+const { AppModule } = require('../dist/src/app.module');
+const { json, urlencoded } = require('express');
+
+let cachedApp;
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+  });
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
+  await app.init();
+  return app.getHttpAdapter().getInstance();
+}
 
 module.exports = async (req, res) => {
   try {
-    return await handler(req, res);
+    if (!cachedApp) {
+      cachedApp = await bootstrap();
+    }
+    cachedApp(req, res);
   } catch (error) {
-    console.error('API Error:', error);
-    res.status(500).json({ error: 'Internal Server Error', message: error?.message });
+    console.error('Handler error:', error);
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: 'Internal Server Error', message: error.message }));
   }
 };
